@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 class Program
 {
-    static Dictionary<string, string> dataStore = new Dictionary<string, string>();
+    static Dictionary<string, string> dataStore = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
     static void Main(string[] args)
     {
@@ -38,18 +38,18 @@ class Program
 
     static string HandleCommand(string command)
     {
-        var parts = command.Split(' ');
-        var cmd = parts[0].ToUpper();
+        var parts = command.Split(' ', 3); // Split into at most 3 parts
+        var cmd = parts[0].ToUpperInvariant();
         switch (cmd)
         {
             case "PING":
                 return "+PONG";
             case "SET":
-                if (parts.Length < 3) return "-ERR wrong number of arguments for 'set' command";
+                if (parts.Length != 3) return "-ERR wrong number of arguments for 'set' command";
                 dataStore[parts[1]] = parts[2];
                 return "+OK";
             case "GET":
-                if (parts.Length < 2) return "-ERR wrong number of arguments for 'get' command";
+                if (parts.Length != 2) return "-ERR wrong number of arguments for 'get' command";
                 if (dataStore.TryGetValue(parts[1], out var value))
                 {
                     return $"${value.Length}\r\n{value}";
